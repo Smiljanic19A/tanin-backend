@@ -3,10 +3,8 @@
 ## Configuration
 
 ```
-BASE_URL = ___________________________________________
+BASE_URL = https://tanin-backend-main-c7nzu9.laravel.cloud/
 ```
-
-> **Important**: Replace the `BASE_URL` above with your production API URL (e.g., `https://api.tanin.com` or `https://your-domain.com`).
 
 ---
 
@@ -14,6 +12,7 @@ BASE_URL = ___________________________________________
 
 1. [Overview](#overview)
 2. [Authentication](#authentication)
+   - [Login](#login)
 3. [Response Format](#response-format)
 4. [Status Codes](#status-codes)
 5. [Reservation Statuses](#reservation-statuses)
@@ -47,7 +46,63 @@ All endpoints return JSON responses and use standard HTTP methods (GET, POST, PA
 
 ## Authentication
 
-> **Note**: Currently, the API is open. If authentication is required in the future, add Laravel Sanctum or another authentication mechanism.
+The API provides a simple login endpoint to validate admin credentials.
+
+### Login
+
+Validate admin credentials. Returns `success: true` if credentials match, `success: false` otherwise.
+
+**Endpoint**
+
+```
+POST {BASE_URL}/api/login
+```
+
+**Request Headers**
+
+```
+Content-Type: application/json
+Accept: application/json
+```
+
+**Request Body**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `email` | string | Yes | Admin email address |
+| `password` | string | Yes | Admin password |
+
+**Example Request**
+
+```bash
+curl -X POST "{BASE_URL}/api/login" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "email": "tanin@admin.com",
+    "password": "your_password_here"
+  }'
+```
+
+**Success Response (200 OK)**
+
+```json
+{
+    "success": true,
+    "message": "Login successful."
+}
+```
+
+**Failed Response (200 OK)**
+
+```json
+{
+    "success": false,
+    "message": "Invalid credentials."
+}
+```
+
+> **Note**: This is a simple credential check. For production use with session management, consider implementing Laravel Sanctum for token-based authentication.
 
 ---
 
@@ -803,6 +858,12 @@ This ensures data integrity and prevents double-processing of reservations.
 ---
 
 ## Quick Reference
+
+### Authentication Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/login` | Validate admin credentials |
 
 ### Bookings Endpoints
 

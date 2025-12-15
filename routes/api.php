@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PrivateReservationController;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,13 @@ use Illuminate\Support\Facades\Route;
 | All routes are prefixed with /api automatically.
 |
 */
+
+// ============================================================================
+// AUTHENTICATION
+// ============================================================================
+
+// POST /api/login - Validate admin credentials
+Route::post('/login', [AuthController::class, 'login']);
 
 // ============================================================================
 // BOOKINGS (Standard Table Reservations)
