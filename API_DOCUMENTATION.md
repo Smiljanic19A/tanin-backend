@@ -16,20 +16,22 @@ BASE_URL = https://tanin-backend-main-c7nzu9.laravel.cloud/
 3. [Response Format](#response-format)
 4. [Status Codes](#status-codes)
 5. [Reservation Statuses](#reservation-statuses)
-6. [Bookings API](#bookings-api)
+6. [Statistics API](#statistics-api)
+   - [Daily Stats](#daily-stats)
+7. [Bookings API](#bookings-api)
    - [List Bookings](#list-bookings)
    - [Create Booking](#create-booking)
    - [Get Booking](#get-booking)
    - [Approve Booking](#approve-booking)
    - [Decline Booking](#decline-booking)
-7. [Private Reservations API](#private-reservations-api)
+8. [Private Reservations API](#private-reservations-api)
    - [List Private Reservations](#list-private-reservations)
    - [Create Private Reservation](#create-private-reservation)
    - [Get Private Reservation](#get-private-reservation)
    - [Approve Private Reservation](#approve-private-reservation)
    - [Decline Private Reservation](#decline-private-reservation)
-8. [Error Handling](#error-handling)
-9. [Race Condition Handling](#race-condition-handling)
+9. [Error Handling](#error-handling)
+10. [Race Condition Handling](#race-condition-handling)
 
 ---
 
@@ -162,6 +164,84 @@ curl -X POST "{BASE_URL}/api/login" \
 
 ---
 
+## Statistics API
+
+Get aggregated statistics for reservations.
+
+### Daily Stats
+
+Get reservation statistics for a specific date, including total reservations and headcount.
+
+**Endpoint**
+
+```
+GET {BASE_URL}/api/stats/daily
+```
+
+**Query Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `date` | string | Yes | Date to get stats for (YYYY-MM-DD) |
+
+**Example Request**
+
+```bash
+curl -X GET "{BASE_URL}/api/stats/daily?date=2025-02-14" \
+  -H "Accept: application/json"
+```
+
+**Example Response (200 OK)**
+
+```json
+{
+    "success": true,
+    "data": {
+        "date": "2025-02-14",
+        "total_reservations": 7,
+        "total_accepted": 5,
+        "total_headcount": 55,
+        "bookings": {
+            "count": 5,
+            "accepted": 4,
+            "headcount": 15
+        },
+        "private_reservations": {
+            "count": 2,
+            "accepted": 1,
+            "headcount_estimate": 40
+        }
+    }
+}
+```
+
+**Response Fields**
+
+| Field | Description |
+|-------|-------------|
+| `total_reservations` | Total number of all reservations (bookings + private) for the date |
+| `total_accepted` | Number of accepted reservations |
+| `total_headcount` | Combined headcount from accepted bookings and estimated private event guests |
+| `bookings.count` | Number of standard bookings |
+| `bookings.accepted` | Number of accepted bookings |
+| `bookings.headcount` | Exact guest count from accepted bookings |
+| `private_reservations.count` | Number of private event inquiries |
+| `private_reservations.accepted` | Number of accepted private reservations |
+| `private_reservations.headcount_estimate` | Estimated guests based on people range |
+
+**People Range Estimates**
+
+Private reservations use people ranges, which are converted to estimates:
+
+| Range | Estimate |
+|-------|----------|
+| `under10` | 5 people |
+| `10to30` | 20 people |
+| `30to50` | 40 people |
+| `over50` | 60 people |
+
+---
+
 ## Bookings API
 
 Standard table reservations for dining and drinks.
@@ -184,7 +264,7 @@ Standard table reservations for dining and drinks.
 
 ### List Bookings
 
-Retrieve a paginated list of bookings with optional filters.
+Retrieve a paginated list of bookings with optional filters. Results are ordered by date ascending (soonest first), then by time.
 
 **Endpoint**
 
@@ -197,6 +277,7 @@ GET {BASE_URL}/api/bookings
 | Parameter | Type | Description | Example |
 |-----------|------|-------------|---------|
 | `status` | integer | Filter by status (0, 1, 2) | `?status=0` |
+| `date` | string | Filter by exact date (YYYY-MM-DD) | `?date=2025-02-14` |
 | `date_from` | string | Start date filter (YYYY-MM-DD) | `?date_from=2025-01-01` |
 | `date_to` | string | End date filter (YYYY-MM-DD) | `?date_to=2025-12-31` |
 | `reservation_type` | string | Filter by type | `?reservation_type=dining` |
@@ -530,7 +611,7 @@ Private event inquiries for birthdays, weddings, corporate events, etc.
 
 ### List Private Reservations
 
-Retrieve a paginated list of private reservations with optional filters.
+Retrieve a paginated list of private reservations with optional filters. Results are ordered by date ascending (soonest first), then by creation time.
 
 **Endpoint**
 
@@ -543,6 +624,7 @@ GET {BASE_URL}/api/private-reservations
 | Parameter | Type | Description | Example |
 |-----------|------|-------------|---------|
 | `status` | integer | Filter by status (0, 1, 2) | `?status=0` |
+| `date` | string | Filter by exact date (YYYY-MM-DD) | `?date=2025-02-14` |
 | `date_from` | string | Start date filter (YYYY-MM-DD) | `?date_from=2025-01-01` |
 | `date_to` | string | End date filter (YYYY-MM-DD) | `?date_to=2025-12-31` |
 | `event_type` | string | Filter by event type | `?event_type=wedding` |
@@ -864,6 +946,12 @@ This ensures data integrity and prevents double-processing of reservations.
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/api/login` | Validate admin credentials |
+
+### Statistics Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/stats/daily?date=YYYY-MM-DD` | Get daily reservation stats and headcount |
 
 ### Bookings Endpoints
 

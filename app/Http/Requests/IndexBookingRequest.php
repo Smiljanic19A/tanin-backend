@@ -27,6 +27,7 @@ final class IndexBookingRequest extends FormRequest
     {
         return [
             'status' => ['nullable', 'integer', Rule::in(Booking::getStatuses())],
+            'date' => ['nullable', 'date', 'date_format:Y-m-d'],
             'date_from' => ['nullable', 'date', 'date_format:Y-m-d'],
             'date_to' => ['nullable', 'date', 'date_format:Y-m-d', 'after_or_equal:date_from'],
             'reservation_type' => ['nullable', 'string', Rule::in(Booking::getReservationTypes())],

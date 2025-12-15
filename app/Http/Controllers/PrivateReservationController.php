@@ -18,6 +18,7 @@ final class PrivateReservationController extends Controller
      *
      * Filters:
      * - status: Filter by status (0=pending, 1=accepted, 2=declined)
+     * - date: Filter by exact date (Y-m-d)
      * - date_from: Filter by start date (Y-m-d)
      * - date_to: Filter by end date (Y-m-d)
      * - event_type: Filter by type (birthday, anniversary, corporate, wedding, other)
@@ -31,6 +32,11 @@ final class PrivateReservationController extends Controller
         // Apply status filter
         if ($request->filled('status')) {
             $query->where('status', $request->integer('status'));
+        }
+
+        // Apply exact date filter
+        if ($request->filled('date')) {
+            $query->whereDate('date', $request->input('date'));
         }
 
         // Apply date range filter
@@ -47,8 +53,8 @@ final class PrivateReservationController extends Controller
             $query->where('event_type', $request->input('event_type'));
         }
 
-        // Order by date descending (newest first)
-        $query->orderBy('date', 'desc')->orderBy('created_at', 'desc');
+        // Order by date ascending (soonest first), then by creation time
+        $query->orderBy('date', 'asc')->orderBy('created_at', 'asc');
 
         // Paginate results
         $perPage = $request->integer('per_page', 15);

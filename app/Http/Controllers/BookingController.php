@@ -18,6 +18,7 @@ final class BookingController extends Controller
      *
      * Filters:
      * - status: Filter by status (0=pending, 1=accepted, 2=declined)
+     * - date: Filter by exact date (Y-m-d)
      * - date_from: Filter by start date (Y-m-d)
      * - date_to: Filter by end date (Y-m-d)
      * - reservation_type: Filter by type (dining, drinks, both)
@@ -31,6 +32,11 @@ final class BookingController extends Controller
         // Apply status filter
         if ($request->filled('status')) {
             $query->where('status', $request->integer('status'));
+        }
+
+        // Apply exact date filter
+        if ($request->filled('date')) {
+            $query->whereDate('date', $request->input('date'));
         }
 
         // Apply date range filter
@@ -47,8 +53,8 @@ final class BookingController extends Controller
             $query->where('reservation_type', $request->input('reservation_type'));
         }
 
-        // Order by date descending (newest first)
-        $query->orderBy('date', 'desc')->orderBy('time', 'asc');
+        // Order by date ascending (soonest first), then by time
+        $query->orderBy('date', 'asc')->orderBy('time', 'asc');
 
         // Paginate results
         $perPage = $request->integer('per_page', 15);

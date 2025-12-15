@@ -27,6 +27,7 @@ final class IndexPrivateReservationRequest extends FormRequest
     {
         return [
             'status' => ['nullable', 'integer', Rule::in(PrivateReservation::getStatuses())],
+            'date' => ['nullable', 'date', 'date_format:Y-m-d'],
             'date_from' => ['nullable', 'date', 'date_format:Y-m-d'],
             'date_to' => ['nullable', 'date', 'date_format:Y-m-d', 'after_or_equal:date_from'],
             'event_type' => ['nullable', 'string', Rule::in(PrivateReservation::getEventTypes())],

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PrivateReservationController;
+use App\Http\Controllers\StatsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,6 +24,13 @@ use Illuminate\Support\Facades\Route;
 
 // POST /api/login - Validate admin credentials
 Route::post('/login', [AuthController::class, 'login']);
+
+// ============================================================================
+// STATISTICS
+// ============================================================================
+
+// GET /api/stats/daily - Get daily reservation statistics
+Route::get('/stats/daily', [StatsController::class, 'daily']);
 
 // ============================================================================
 // BOOKINGS (Standard Table Reservations)
